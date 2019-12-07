@@ -7,6 +7,7 @@ TagManager:
   - Fire
   - nenryou
   - nenryouMax
+  - jump
   layers:
   - Default
   - TransparentFX
