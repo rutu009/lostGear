@@ -18,6 +18,9 @@ public class nenryou : MonoBehaviour
     [SerializeField] bool maxkaihuku = true;
     Rigidbody2D r;
     [SerializeField] float texttime = 3.0f;
+    [SerializeField] string m_gameover = "gameover";
+    [SerializeField] string m_gameclear = "gameclear";
+    [SerializeField] float fadespeed = 1.0f;
 
     // Use this for initialization
     void Start()
@@ -40,20 +43,29 @@ public class nenryou : MonoBehaviour
         if (Input.GetKey("a") || Input.GetKey("d"))
         {
             hpSlider.value -= decreaseMove;
-            Debug.Log(hpSlider.value);
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             hpSlider.value -= decreaseJump;
-            Debug.Log(hpSlider.value);
         }
-        if (r.bodyType == RigidbodyType2D.Static & Input.GetKeyDown(KeyCode.Space))
+        if (r.bodyType == RigidbodyType2D.Static && Input.GetKeyDown(KeyCode.Q) && !maxkaihuku && maxkaihukupanel)
         {
             r.bodyType = RigidbodyType2D.Dynamic;
+            Debug.Log("aa");
+            Destroy(maxkaihukupanel);
+        }
+        if (r.bodyType == RigidbodyType2D.Static && Input.GetKeyDown(KeyCode.Q) && !kaihuku && kaihukuPanel)
+        {
+            r.bodyType = RigidbodyType2D.Dynamic;
+            Destroy(kaihukuPanel);
+        }
+        if (hpSlider.value <= 0)
+        {
+            Initiate.Fade(m_gameover, Color.black, fadespeed);
         }
     }
-    void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         float tagNenryouMax = hpSlider.maxValue - hpSlider.value;
         if (collision.gameObject.tag == "nenryouMax")
@@ -63,7 +75,6 @@ public class nenryou : MonoBehaviour
                 maxkaihukupanel.SetActive(true);
                 maxkaihuku = false;
                 r.bodyType = RigidbodyType2D.Static;
-                Destroy(maxkaihukupanel,texttime);
             }
 
             hpSlider.value += tagNenryouMax;
@@ -75,13 +86,13 @@ public class nenryou : MonoBehaviour
                 kaihukuPanel.SetActive(true);
                 kaihuku = false;
                 r.bodyType = RigidbodyType2D.Static;
-                Destroy(kaihukuPanel, texttime);
             }
             hpSlider.value += 10;
         }
-
-        
+        if (collision.gameObject.tag == "gameclear")
+        {
+            Initiate.Fade(m_gameclear, Color.black, fadespeed);
+        }
     }
-
     // Update is called once per frame
 }

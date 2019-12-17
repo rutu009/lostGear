@@ -11,6 +11,7 @@ namespace UnityStandardAssets._2D
         [SerializeField] private bool m_AirControl = false;                 // Whether or not a player can steer while jumping;
         [SerializeField] private LayerMask m_WhatIsGround;// A mask determining what is ground to the character
         [SerializeField] float jumpItem = 100f;
+        [SerializeField] GameObject jumppanel;
 
         private Transform m_GroundCheck;    // A position marking where to check if the player is grounded.
         const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
@@ -20,6 +21,7 @@ namespace UnityStandardAssets._2D
         private Animator m_Anim;            // Reference to the player's animator component.
         private Rigidbody2D m_Rigidbody2D;
         private bool m_FacingRight = true;  // For determining which way the player is currently facing.
+        bool jumpbool = true;
 
         private void Awake()
         {
@@ -49,6 +51,14 @@ namespace UnityStandardAssets._2D
             m_Anim.SetFloat("vSpeed", m_Rigidbody2D.velocity.y);
         }
 
+        void Update()
+        {
+            if (m_Rigidbody2D.bodyType == RigidbodyType2D.Static && Input.GetKeyDown(KeyCode.Q) && !jumpbool && jumppanel)
+            {
+                m_Rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
+                Destroy(jumppanel);
+            }   
+        }
 
         public void Move(float move, bool crouch, bool jump)
         {
@@ -100,10 +110,16 @@ namespace UnityStandardAssets._2D
             }
         }
 
-        void OnCollisionEnter2D(Collision2D collision)
+        void OnTriggerEnter2D(Collider2D collision)
         {
             if (collision.gameObject.tag == "jump")
             {
+                if (jumpbool)
+                {
+                    jumppanel.SetActive(true);
+                    jumpbool = false;
+                    m_Rigidbody2D.bodyType = RigidbodyType2D.Static;
+                }
                 m_JumpForce += jumpItem;
             }
         }
