@@ -21,6 +21,12 @@ public class nenryou : MonoBehaviour
     [SerializeField] string m_gameover = "gameover";
     [SerializeField] string m_gameclear = "gameclear";
     [SerializeField] float fadespeed = 1.0f;
+    [SerializeField] float enemydamage = 10f;
+    [SerializeField] Text timertext;
+    bool m_isworking = true;
+    float timer;
+    public bool damage = false;
+    public SpriteRenderer renderer;
 
     // Use this for initialization
     void Start()
@@ -64,8 +70,28 @@ public class nenryou : MonoBehaviour
         {
             Initiate.Fade(m_gameover, Color.black, fadespeed);
         }
+        if (m_isworking)
+        {
+            timer += Time.deltaTime;
+            Refresh();
+        }
+        if (damage)
+        {
+            float level = Mathf.Abs(Mathf.Sin(Time.time * 10));
+            renderer.color = new Color(1f, 1f, 1f, level);
+        }
     }
-    private void OnTriggerEnter2D(Collider2D collision)
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "enemy")
+        {
+            hpSlider.value -= enemydamage;
+            DamageEffect();
+        }    
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
     {
         float tagNenryouMax = hpSlider.maxValue - hpSlider.value;
         if (collision.gameObject.tag == "nenryouMax")
@@ -94,5 +120,43 @@ public class nenryou : MonoBehaviour
             Initiate.Fade(m_gameclear, Color.black, fadespeed);
         }
     }
+
+    void DamageEffect()
+    {
+        // ダメージフラグON
+        damage = true;
+
+        // プレイヤーの位置を後ろに飛ばす
+        float s = 100f * Time.deltaTime;
+        transform.Translate(Vector3.up * s);
+
+        // プレイヤーのlocalScaleでどちらを向いているのかを判定
+        if (transform.localScale.x >= 0)
+        {
+            transform.Translate(Vector3.left * s);
+        }
+        else
+        {
+            transform.Translate(Vector3.right * s);
+        }
+
+        // コルーチン開始
+        StartCoroutine("WaitForIt");
+    }
+
+    IEnumerator WaitForIt()
+    {
+        // 1秒間処理を止める
+        yield return new WaitForSeconds(1);
+
+        // １秒後ダメージフラグをfalseにして点滅を戻す
+        damage = false;
+        renderer.color = new Color(1f, 1f, 1f, 1f);
+    }
+
     // Update is called once per frame
+    void Refresh()
+    {
+        timertext.text = timer.ToString("F2");
+    }
 }
