@@ -9,6 +9,9 @@ TagManager:
   - nenryouMax
   - jump
   - gameclear
+  - movestage
+  - laststage
+  - enemy
   layers:
   - Default
   - TransparentFX
